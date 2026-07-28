@@ -1,4 +1,4 @@
-## Project Name: RentNest
+## Project Name: RentNest-Backend
 
 ## Introduction:
 
