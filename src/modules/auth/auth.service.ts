@@ -160,20 +160,127 @@ const getMyProfileIntoDB = async (userId: string) => {
 };
 
 const updateMyProfileIntoDB = async (userId: string, payload: any) => {
-    const { name, email, profilePhoto, role, bio } = payload;
+    const {
+        name,
+        email,
+        role,
+        fullName,
+        phone,
+        gender,
+        dateOfBirth,
+        address,
+        city,
+        country,
+        postalCode,
+        profilePhoto,
+        bio,
+    } = payload;
 
     const updateUser = await prisma.user.update({
         where: {
             id: userId,
         },
+
         data: {
-            name,
-            email,
-            role,
+            // User table update
+            ...(name !== undefined && {
+                name,
+            }),
+
+            ...(email !== undefined && {
+                email,
+            }),
+
+            ...(role !== undefined && {
+                role,
+            }),
+
+            // Profile table update/create
             profile: {
-                update: {
-                    profilePhoto,
-                    bio,
+                upsert: {
+                    // If profile exists
+                    update: {
+                        ...(fullName !== undefined && {
+                            fullName,
+                        }),
+
+                        ...(phone !== undefined && {
+                            phone,
+                        }),
+
+                        ...(gender !== undefined && {
+                            gender,
+                        }),
+
+                        ...(dateOfBirth !== undefined && {
+                            dateOfBirth,
+                        }),
+
+                        ...(address !== undefined && {
+                            address,
+                        }),
+
+                        ...(city !== undefined && {
+                            city,
+                        }),
+
+                        ...(country !== undefined && {
+                            country,
+                        }),
+
+                        ...(postalCode !== undefined && {
+                            postalCode,
+                        }),
+
+                        ...(profilePhoto !== undefined && {
+                            profilePhoto,
+                        }),
+
+                        ...(bio !== undefined && {
+                            bio,
+                        }),
+                    },
+
+                    // If profile does not exist
+                    create: {
+                        fullName: fullName || name || 'Unknown User',
+
+                        ...(phone !== undefined && {
+                            phone,
+                        }),
+
+                        ...(gender !== undefined && {
+                            gender,
+                        }),
+
+                        ...(dateOfBirth !== undefined && {
+                            dateOfBirth,
+                        }),
+
+                        ...(address !== undefined && {
+                            address,
+                        }),
+
+                        ...(city !== undefined && {
+                            city,
+                        }),
+
+                        ...(country !== undefined && {
+                            country,
+                        }),
+
+                        ...(postalCode !== undefined && {
+                            postalCode,
+                        }),
+
+                        ...(profilePhoto !== undefined && {
+                            profilePhoto,
+                        }),
+
+                        ...(bio !== undefined && {
+                            bio,
+                        }),
+                    },
                 },
             },
         },

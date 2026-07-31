@@ -88,6 +88,9 @@ const getMyProfile = catchAsync(
 
 const updateMyProfile = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
+        console.log('USER:', req.user);
+
+        console.log('BODY:', req.body);
         const userId = req?.user?.id as string;
         const payload = req.body;
 
