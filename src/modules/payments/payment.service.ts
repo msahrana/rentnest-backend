@@ -2,7 +2,12 @@ import { prisma } from '../../lib/prisma';
 import { stripe } from '../../lib/stripe';
 import config from '../../config';
 import Stripe from 'stripe';
-import { PaymentMethod, PaymentStatus, Role } from '../../../generated/prisma/enums';
+import {
+    PaymentMethod,
+    PaymentStatus,
+    RentalRequestStatus,
+    Role,
+} from '../../../generated/prisma/enums';
 
 const createCheckoutSessionIntoDB = async (rentalRequestId: string) => {
     const rentalRequest = await prisma.rentalRequest.findUniqueOrThrow({
@@ -15,6 +20,10 @@ const createCheckoutSessionIntoDB = async (rentalRequestId: string) => {
             payment: true,
         },
     });
+
+    if (rentalRequest.status !== RentalRequestStatus.APPROVED) {
+        throw new Error('Only approved rental requests can be paid.');
+    }
 
     let stripeCustomerId = rentalRequest.payment?.stripeCustomerId;
 
@@ -50,8 +59,11 @@ const createCheckoutSessionIntoDB = async (rentalRequestId: string) => {
             },
         ],
 
-        success_url: `${config.APP_URL}/payment-success`,
-        cancel_url: `${config.APP_URL}/payment-cancel`,
+        // success_url: `${config.APP_URL}/payment-success`,
+        // cancel_url: `${config.APP_URL}/payment-cancel`,
+
+        success_url: `${config.APP_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${config.APP_URL}/payment/cancel`,
 
         metadata: {
             rentalRequestId: rentalRequest.id,
@@ -124,6 +136,16 @@ const handleWebhookIntoDB = async (payload: Buffer, signature: string) => {
                     paidAt: new Date(),
                     stripeCustomerId,
                     currentPeriodEnd: new Date(),
+                },
+            });
+
+            await prisma.rentalRequest.updateMany({
+                where: {
+                    id: rentalRequestId,
+                },
+
+                data: {
+                    status: RentalRequestStatus.COMPLETED,
                 },
             });
 
