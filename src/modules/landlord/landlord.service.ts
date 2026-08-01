@@ -6,6 +6,9 @@ const createPropertyIntoDB = async (
     payload: ICreateProperty,
     landlordId: string,
 ) => {
+    console.log('LANDLORD ID:', landlordId);
+
+    console.log('PROPERTY PAYLOAD:', payload);
     // Check landlord
     const landlord = await prisma.user.findUnique({
         where: {
@@ -150,11 +153,40 @@ const updatePropertyIntoDB = async (
         throw new Error('Unauthorized');
     }
 
+    const updateData = {
+        title: payload.title,
+
+        description: payload.description,
+
+        location: payload.location,
+
+        address: payload.address,
+
+        rent: Number(payload.rent),
+
+        bedrooms: Number(payload.bedrooms),
+
+        bathrooms: Number(payload.bathrooms),
+
+        area: Number(payload.area),
+
+        propertyType: payload.propertyType,
+
+        categoryId: payload.categoryId,
+
+        amenities: payload.amenities,
+
+        thumbnail: payload.thumbnail,
+
+        images: payload.images,
+    };
+
     return prisma.property.update({
         where: {
             id,
         },
-        data: payload,
+
+        data: updateData,
     });
 };
 
